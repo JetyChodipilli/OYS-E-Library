@@ -1,5 +1,9 @@
 > **v1.6 notice:** A security, quality, and schema-integrity hardening pass is available in [README_V1.6.md](README_V1.6.md) and [QA_v1.6.md](QA_v1.6.md). The application is still incomplete and must not be deployed to production.
 
+## Import as Maven in Eclipse / STS
+
+The repository now has a root [`pom.xml`](pom.xml) Maven aggregator that includes the [`backend`](backend/pom.xml) Spring Boot module. Use **File → Import → Maven → Existing Maven Projects**, select the repository root, and import both POMs. The Next.js [`frontend`](frontend/) is a separate npm project, not a Maven module. See [IMPORT_ECLIPSE.md](IMPORT_ECLIPSE.md) for detailed troubleshooting.
+
 # OYS E-Library — v1.5 Project Update
 
 **Scope of this release:** category/subcategory taxonomy, safe data migration, authenticated backend list and admin taxonomy APIs, catalogue search/sort/pagination, Arctic Blue Student and Admin demo navigation, and regression checks.
