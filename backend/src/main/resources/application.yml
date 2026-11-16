@@ -1,4 +1,10 @@
 spring:
+  # Local .env is a Java .properties file. Deployment environment variables take precedence.
+  # Eclipse may launch from backend/, while Maven may launch from the repository root.
+  config:
+    import:
+      - "optional:file:./.env[.properties]"
+      - "optional:file:./backend/.env[.properties]"
   application:
     name: oys-elibrary
   datasource:
