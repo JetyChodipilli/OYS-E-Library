@@ -4,6 +4,10 @@ The Student Home shows **sector → category → optional subcategory → subjec
 
 Colors: background `#F3F8FC`, accent `#3975A5`, text `#233A50`, support blue `#DCECF5`. Material covers are **static** original SVG technical diagrams. No GIFs, decorative AI-like marks, or animated material cards. Only navigation icon paths move subtly on hover/keyboard focus; reduced-motion requests are respected.
 
+## Frontend environment file
+
+From the repository root run `setup-env.cmd` (Windows) or `bash setup-env.sh` (macOS/Linux). These initialize `frontend/.env` and `backend/.env` without overwriting any existing file. Next.js reads `frontend/.env` automatically. Existing `.env.local` takes precedence. Keep database credentials and private JWT secrets out of frontend env files. See [ENV_SETUP.md](../ENV_SETUP.md).
+
 ## Development preview
 
 ```bash
