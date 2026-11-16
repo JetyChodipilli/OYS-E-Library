@@ -4,6 +4,10 @@
 
 The repository now has a root [`pom.xml`](pom.xml) Maven aggregator that includes the [`backend`](backend/pom.xml) Spring Boot module. Use **File → Import → Maven → Existing Maven Projects**, select the repository root, and import both POMs. The Next.js [`frontend`](frontend/) is a separate npm project, not a Maven module. See [IMPORT_ECLIPSE.md](IMPORT_ECLIPSE.md) for detailed troubleshooting.
 
+## Configure backend and frontend environment
+
+Run `setup-env.cmd` at the repository root on Windows or `bash setup-env.sh` on macOS/Linux to create **local, Git-ignored** `backend/.env` and `frontend/.env` files without overwriting existing secrets. Edit the backend file with your real PostgreSQL and OYS identity provider settings. Spring Boot now explicitly imports the backend `.env` when started from the repository root or backend directory; Next.js automatically reads the frontend `.env`. See [ENV_SETUP.md](ENV_SETUP.md) for exact Eclipse/STS and CMD instructions. **No real credentials are stored in GitHub.**
+
 # OYS E-Library — v1.5 Project Update
 
 **Scope of this release:** category/subcategory taxonomy, safe data migration, authenticated backend list and admin taxonomy APIs, catalogue search/sort/pagination, Arctic Blue Student and Admin demo navigation, and regression checks.
