@@ -1,0 +1,183 @@
+PASS v1_migration_retained
+PASS v2_migration_retained
+PASS v3_categories_created
+PASS v3_category_parent_fk
+PASS v3_unique_root_sibling_slug
+PASS v3_one_subcategory_level
+PASS v3_prevent_hiding_populated_category
+PASS v3_active_subject_category
+PASS v3_subject_backfill
+PASS v3_subject_category_not_null
+PASS v3_subject_sector_fk
+PASS v3_search_indexes
+PASS v3_no_drop_or_truncate
+PASS api_category_list
+PASS api_subject_list
+PASS api_taxonomy_college_filter
+PASS api_material_list
+PASS api_college_from_jwt
+PASS api_no_college_query_param
+PASS api_fails_closed_on_missing_college
+PASS api_uses_bound_params
+PASS api_order_allowlist
+PASS api_sort_bad_request
+PASS api_rejects_oversize_page
+PASS api_repeatable_read_consistency
+PASS api_material_college_filter
+PASS api_publish_only
+PASS admin_category_role
+PASS admin_category_update
+PASS admin_subject_role
+PASS student_taxonomy_selection
+PASS student_sorted_paginated
+PASS student_page_reset
+PASS admin_category_preview
+PASS admin_paginated_list
+PASS frontend_demo_gate
+PASS frontend_no_dangerous_html
+PASS frontend_arctic_blue
+PASS frontend_glass
+PASS frontend_responsive
+PASS frontend_no_gifs
+PASS frontend_motion_reduced
+PASS frontend_preview_labels
+PASS node_ts_frontend
+PASS pom_well_formed
+PASS COUNT 45/45
+PASS critical_method_security_enabled
+PASS admin_route_authorized_at_filter_chain
+PASS unknown_routes_denied
+PASS jwt_audience_validated
+PASS jwt_issuer_validated
+PASS student_college_claim_required
+PASS sector_list_is_college_scoped
+PASS subject_list_can_include_subcategories
+PASS published_catalogue_scans_checked
+PASS sql_parameters_for_catalogue
+PASS pagination_size_capped
+PASS new_v4_is_additive
+PASS published_documents_are_frozen
+PASS asset_quarantine_archives_publications
+PASS asset_metadata_frozen
+PASS published_asset_types_verified
+PASS preview_disabled_in_production
+PASS admin_preview_does_not_post
+PASS admin_kpis_not_fabricated
+PASS no_nonfunctional_analytics_date_control
+PASS no_empty_taxonomy_section
+PASS sidebar_sector_navigation_not_plain_text
+PASS static_topic_thumbnails
+PASS no_gif_assets
+PASS only_navigation_icon_motion
+PASS keyboard_focus_styles
+PASS reduced_motion_support
+PASS responsive_breakpoints
+PASS no_dangerous_html
+PASS no_client_side_auth_token_store
+PASS css_parses
+RESULT 31 / 31
+TS/TSX parsed: 14 files; syntax errors: 0
+TAP version 13
+# Subtest: fixture has enough material to show paginated pages
+ok 1 - fixture has enough material to show paginated pages
+  ---
+  duration_ms: 0.920035
+  type: 'test'
+  ...
+# Subtest: page 0 shows twelve items
+ok 2 - page 0 shows twelve items
+  ---
+  duration_ms: 7.97345
+  type: 'test'
+  ...
+# Subtest: last page never duplicates items
+ok 3 - last page never duplicates items
+  ---
+  duration_ms: 1.873801
+  type: 'test'
+  ...
+# Subtest: page index clamps for changed filters
+ok 4 - page index clamps for changed filters
+  ---
+  duration_ms: 0.216883
+  type: 'test'
+  ...
+# Subtest: zero results show one empty page without next
+ok 5 - zero results show one empty page without next
+  ---
+  duration_ms: 0.123181
+  type: 'test'
+  ...
+# Subtest: reject invalid page sizes
+ok 6 - reject invalid page sizes
+  ---
+  duration_ms: 0.664031
+  type: 'test'
+  ...
+# Subtest: sector filters exclude all other sectors
+ok 7 - sector filters exclude all other sectors
+  ---
+  duration_ms: 0.139241
+  type: 'test'
+  ...
+# Subtest: category filters match expected branch
+ok 8 - category filters match expected branch
+  ---
+  duration_ms: 0.237483
+  type: 'test'
+  ...
+# Subtest: subcategory isolates backend language branch
+ok 9 - subcategory isolates backend language branch
+  ---
+  duration_ms: 0.298181
+  type: 'test'
+  ...
+# Subtest: subject and Free constrain all matches
+ok 10 - subject and Free constrain all matches
+  ---
+  duration_ms: 0.355221
+  type: 'test'
+  ...
+# Subtest: search matches subject and description case-insensitively
+ok 11 - search matches subject and description case-insensitively
+  ---
+  duration_ms: 0.237196
+  type: 'test'
+  ...
+# Subtest: Trending is an independent filter
+ok 12 - Trending is an independent filter
+  ---
+  duration_ms: 0.104995
+  type: 'test'
+  ...
+# Subtest: saved filter uses only saved ids
+ok 13 - saved filter uses only saved ids
+  ---
+  duration_ms: 0.18089
+  type: 'test'
+  ...
+# Subtest: sort title ascending and descending are reverses without ties
+ok 14 - sort title ascending and descending are reverses without ties
+  ---
+  duration_ms: 0.190472
+  type: 'test'
+  ...
+# Subtest: changing page size does not omit content
+ok 15 - changing page size does not omit content
+  ---
+  duration_ms: 0.096757
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 76.514482
+student.html generated from actual TSX markup; bytes 32019
+reader.html generated from actual TSX markup; bytes 12734
+admin.html generated from actual TSX markup; bytes 17979
+Offline catalogue tests and static TSX snapshots passed. No live DB/browser validation performed.

@@ -1,0 +1,25 @@
+# LOCAL INFRA ONLY. Not a production cluster. Password must be supplied explicitly.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: oys_elibrary
+      POSTGRES_USER: ${OYS_DB_USER:?Set OYS_DB_USER}
+      POSTGRES_PASSWORD: ${OYS_DB_PASSWORD:?Set OYS_DB_PASSWORD}
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - oys_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      retries: 6
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "no", "--save", ""]
+    ports:
+      - '127.0.0.1:6379:6379'
+volumes:
+  oys_postgres_data:

@@ -1,0 +1,18 @@
+digraph DB {
+  graph [rankdir=LR, bgcolor="transparent", pad=0.15, nodesep=0.4, ranksep=0.6, splines=ortho, fontname="DejaVu Sans"];
+  node [shape=box, style="rounded,filled", color="#cbd8e7", fillcolor="#f8fafc", fontcolor="#283c55", fontname="DejaVu Sans", fontsize=10, margin="0.15,0.1"];
+  edge [color="#8a9eb6", arrowsize=0.55];
+  sec [label="sectors",fillcolor="#ddeafa"]; subj [label="subjects",fillcolor="#ddeafa"]; mat [label="materials",fillcolor="#ddeafa"];
+  ver [label="material_versions",fillcolor="#e0ecfb"]; pag [label="material_pages"]; toc [label="material_toc"];
+  mp [label="student_material_progress",fillcolor="#e5f2ec"]; comp [label="student_page_completions",fillcolor="#e5f2ec"];
+  qualifying [label="qualifying_free_completions",fillcolor="#fff0d9"]; wallet [label="student_reward_accounts",fillcolor="#fff0d9"];
+  ledger [label="premium_credit_ledger",fillcolor="#fff0d9"]; entitlement [label="premium_entitlements",fillcolor="#fff0d9"];
+  sec -> subj -> mat -> ver -> pag;
+  ver -> toc;
+  mat -> mp;
+  pag -> comp;
+  comp -> qualifying [style=dashed,color="#d0a76d"];
+  qualifying -> wallet [style=dashed,color="#d0a76d"];
+  wallet -> ledger;
+  wallet -> entitlement;
+}

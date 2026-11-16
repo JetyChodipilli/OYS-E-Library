@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: oys-elibrary
+  datasource:
+    url: ${OYS_DB_URL}
+    username: ${OYS_DB_USER}
+    password: ${OYS_DB_PASSWORD}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OYS_JWT_ISSUER}
+          jwk-set-uri: ${OYS_JWKS_URI}
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+  forward-headers-strategy: none
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+oys:
+  security:
+    audience: ${OYS_JWT_AUDIENCE}

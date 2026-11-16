@@ -1,0 +1,22 @@
+digraph OYS {
+  graph [rankdir=LR, bgcolor="transparent", pad=0.2, nodesep=0.42, ranksep=0.5, splines=polyline, fontname="DejaVu Sans"];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=11, penwidth=1.1, color="#c7d5e6", fillcolor="#f8fafc", fontcolor="#283c55", margin="0.17,0.15"];
+  edge [color="#8296ae", arrowsize=0.65, penwidth=1.3];
+  client [label="OYS Web\nAdmin / Student", fillcolor="#dce8f7"];
+  lb [label="HTTPS\nLoad Balancer"];
+  gateway [label="API Gateway\nJWT + Rate Limits", fillcolor="#e6ecfc"];
+  core [label="Spring Boot\nE-Library API", fillcolor="#d6e6f8"];
+  identity [label="Existing OYS\nIdentity + Subscription"];
+  pg [label="PostgreSQL\nAuthoritative Records", fillcolor="#def1e8"];
+  redis [label="Redis\nCache + Rate Limit", fillcolor="#def1e8"];
+  object [label="Private Object\nStorage", fillcolor="#def1e8"];
+  jobs [label="Durable Jobs\nDocument Worker"];
+  client -> lb -> gateway -> core;
+  gateway -> identity [constraint=false];
+  gateway -> redis [constraint=false];
+  core -> pg;
+  core -> redis;
+  core -> object;
+  core -> jobs;
+  jobs -> object;
+}

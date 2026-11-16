@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+<title id="title">Python Foundations</title><desc id="desc">Static learning material illustration with a topic-specific technical diagram.</desc>
+<rect width="960" height="560" fill="#DCECF5"/><rect x="0" y="0" width="960" height="560" fill="none" stroke="#B9D2E4" stroke-width="2"/>
+<g font-family="Arial,Helvetica,sans-serif"><text x="62" y="80" font-size="24" letter-spacing="3.2" font-weight="700" fill="#477CA3">OYS / IT / PROGRAMMING</text>
+<text x="62" y="251" font-size="76" font-weight="750" letter-spacing="-2" fill="#294F6D">Python</text>
+<text x="62" y="335" font-size="76" font-weight="750" letter-spacing="-2" fill="#294F6D">Foundations</text>
+<text x="62" y="500" font-size="23" font-weight="650" letter-spacing="2" fill="#477CA3">LEARNING MATERIAL</text></g><rect x="613" y="155" width="285" height="238" rx="13" fill="white" stroke="#9DBCD3" stroke-width="3"/><path d="M613 201h285" stroke="#9DBCD3" stroke-width="3"/><g fill="#416F95" font-family="monospace" font-size="25"><text x="641" y="254">def learn(topic):</text><text x="656" y="303">return topic</text><text x="641" y="360">learn('Python')</text></g></svg>

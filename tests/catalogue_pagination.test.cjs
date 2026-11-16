@@ -1,0 +1,25 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const root=process.env.OYS_TEST_BUILD;
+if(!root)throw new Error('OYS_TEST_BUILD env must point at the compiled TS test folder');
+const {materials}=require(path.join(root,'components/sampleData.js'));
+const {paginate,filterAndSortMaterials}=require(path.join(root,'lib/cataloguePagination.js'));
+const defaults={query:'',sector:'All sectors',category:'',subcategory:'',subject:'',access:'All Materials',sort:'RECENT',savedIds:new Set()};
+const find=(changes={})=>filterAndSortMaterials(materials,{...defaults,...changes});
+
+test('fixture has enough material to show paginated pages',()=>assert.ok(materials.length>24));
+test('page 0 shows twelve items',()=>{const p=paginate(find(),0,12);assert.equal(p.content.length,12);assert.equal(p.page,0);assert.equal(p.hasPrevious,false);assert.equal(p.hasNext,true);});
+test('last page never duplicates items',()=>{const rows=find();const pages=Array.from({length:Math.ceil(rows.length/12)},(_,i)=>paginate(rows,i,12).content).flat();assert.deepEqual(pages.map(x=>x.id),rows.map(x=>x.id));});
+test('page index clamps for changed filters',()=>{const p=paginate(find({subject:'Java'}),999,12);assert.equal(p.page,p.totalPages-1);assert.equal(p.hasNext,false);});
+test('zero results show one empty page without next',()=>{const p=paginate([],12,12);assert.equal(p.totalPages,1);assert.equal(p.content.length,0);assert.equal(p.hasNext,false);});
+test('reject invalid page sizes',()=>{for(const s of [0,49,-1,NaN])assert.throws(()=>paginate([],0,s),RangeError);});
+test('sector filters exclude all other sectors',()=>{const a=find({sector:'IT'});assert.ok(a.length>0);assert.ok(a.every(x=>x.sector==='IT'));});
+test('category filters match expected branch',()=>{const a=find({category:'Programming Languages'});assert.ok(a.every(x=>x.category==='Programming Languages'));});
+test('subcategory isolates backend language branch',()=>{const a=find({subcategory:'Backend Languages'});assert.ok(a.length>12);assert.ok(a.every(x=>x.subcategory==='Backend Languages'));});
+test('subject and Free constrain all matches',()=>{const a=find({subject:'Java',access:'Free'});assert.ok(a.length>1);assert.ok(a.every(x=>x.subject==='Java'&&x.access==='Free'));});
+test('search matches subject and description case-insensitively',()=>{assert.ok(find({query:'JAVA'}).length>0);assert.ok(find({query:'concurrency'}).length>0);});
+test('Trending is an independent filter',()=>assert.ok(find({access:'Trending'}).every(x=>x.trending)));
+test('saved filter uses only saved ids',()=>{const a=find({access:'Saved',savedIds:new Set(['java','dsa'])});assert.deepEqual(new Set(a.map(x=>x.id)),new Set(['java','dsa']));});
+test('sort title ascending and descending are reverses without ties',()=>{const a=find({sort:'TITLE_ASC'});const b=find({sort:'TITLE_DESC'});assert.deepEqual(a.map(x=>x.title),b.map(x=>x.title).reverse());});
+test('changing page size does not omit content',()=>{const a=paginate(find(),0,48);assert.equal(a.content.length,materials.length);assert.equal(a.totalPages,1);});
