@@ -3,6 +3,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 python3 "$ROOT/tests/validate_design.py"
 python3 "$ROOT/tests/security_ui_contract.py"
+python3 "$ROOT/tests/env_config_contract.py"
 node "$ROOT/tests/tsx_syntax.cjs"
 TEMP="$(mktemp -d)"
 trap 'rm -rf "$TEMP"' EXIT
