@@ -1,83 +1,105 @@
-# OYS E-Library — local `.env` setup
+# OYS E-Library — local database and real JWT issuer
 
-The project contains two separate applications: **Spring Boot backend** and **Next.js frontend**. This public repository commits only safe `.env.example` templates, never real credentials.
+**Local development only.** This setup creates a real local identity provider but does not yet implement Next.js login/session integration, verified college onboarding, subscription checks, single-session policy, or production deployment. Do not deploy this as a complete production solution.
 
-## Windows: create both local files
+## 1. Create local, Git-ignored configuration
 
-In CMD, from the cloned repository **root** (not inside `frontend`):
+On Windows CMD run `setup-env.cmd` from the repository root; on macOS/Linux use `bash setup-env.sh`. The scripts preserve any pre-existing files and create missing:
 
-```cmd
-git pull origin main
-setup-env.cmd
-```
+- `backend/.env`
+- `frontend/.env`
+- `infrastructure/keycloak/.env`
 
-The script creates `backend/.env` and `frontend/.env` **only if absent** and does not overwrite existing files. If you use PowerShell, run `./setup-env.cmd` (or `.\setup-env.cmd`). On macOS/Linux, run `bash setup-env.sh`.
+The root `.gitignore` excludes all `.env` secrets while allowing `.env.example` templates. Spring Boot reads `backend/.env` as Java properties. Run the backend with working directory either at the repo root or `backend/`. Process environment variables override imported local files.
 
-## Backend: edit `backend/.env`
+## 2. Set up PostgreSQL 16+
 
-```dotenv
+Configure `backend/.env`:
+
+```properties
 OYS_DB_URL=jdbc:postgresql://127.0.0.1:5432/oys_elibrary
 OYS_DB_USER=oys_elibrary_app
-OYS_DB_PASSWORD=YOUR_REAL_POSTGRES_PASSWORD
-OYS_JWT_ISSUER=https://YOUR_REAL_OYS_ISSUER/
-OYS_JWKS_URI=https://YOUR_REAL_OYS_IDENTITY_PROVIDER/.well-known/jwks.json
+OYS_DB_PASSWORD=YOUR_ACTUAL_UNIQUE_DATABASE_PASSWORD
+```
+
+Replace the password with a long unique value **only in the local file**.
+
+If you already run PostgreSQL locally, connect as its administrator and, **only if missing**, create the application login and database:
+
+```sql
+CREATE ROLE oys_elibrary_app LOGIN;
+CREATE DATABASE oys_elibrary OWNER oys_elibrary_app;
+```
+
+Set the password through the interactive `psql` command `\password oys_elibrary_app`, which avoids putting credentials in shell or SQL history. Do not reuse a `postgres/postgres` administrative login. Flyway needs migration privileges; production should use a separate migration account and minimally privileged app account.
+
+Alternatively, for a **fresh Docker development database**, start the existing repo service:
+
+```powershell
+docker compose --env-file backend/.env -f infrastructure/compose.dev.yaml up -d postgres
+```
+
+Choose either the installed PostgreSQL service or the Docker service; both cannot bind `127.0.0.1:5432`. For a new Docker volume, Postgres uses `OYS_DB_USER` and `OYS_DB_PASSWORD` during initialization. The current Docker dev Compose creates an initial superuser; this must not be used as a production least-privilege scheme. Changing env values does **not** change credentials in an existing PostgreSQL volume: do not erase data to force a reset.
+
+## 3. Start local Keycloak authentication
+
+Install Docker Desktop. Set `infrastructure/keycloak/.env` (ignored by Git):
+
+```properties
+KC_BOOTSTRAP_ADMIN_USERNAME=oys-local-admin
+KC_BOOTSTRAP_ADMIN_PASSWORD=SET_A_UNIQUE_LONG_RANDOM_PASSWORD
+```
+
+Use your own strong password. From repository root run:
+
+```powershell
+docker compose --env-file infrastructure/keycloak/.env -f infrastructure/compose.auth.dev.yaml up -d
+```
+
+The local Keycloak container listens only on `127.0.0.1:8180` and imports `infrastructure/keycloak/oys-realm.json` if the `oys` realm does not already exist. Its data persists in a Docker volume. If this is an existing realm, import does not overwrite it; update the realm through the admin console. Bootstrap admin credentials only apply at initial setup; editing the env file later does not rotate the existing password.
+
+Verify:
+
+- Admin: http://localhost:8180/admin/
+- Discovery: http://localhost:8180/realms/oys/.well-known/openid-configuration
+- JWKS: http://localhost:8180/realms/oys/protocol/openid-connect/certs
+
+Discovery must report issuer `http://localhost:8180/realms/oys`. JWKS must contain a `keys` array.
+
+## 4. Configure actual local JWT endpoints
+
+Keep these entries in your local `backend/.env`:
+
+```properties
+OYS_JWT_ISSUER=http://localhost:8180/realms/oys
+OYS_JWKS_URI=http://localhost:8180/realms/oys/protocol/openid-connect/certs
 OYS_JWT_AUDIENCE=oys-elibrary
 PORT=8080
 ```
 
-Replace placeholders with values from your real local PostgreSQL and **existing OYS login service**. This repository does not provide identity credentials. The JWT issuer must exactly match the `iss` claim, JWKS must be the public signing-key endpoint, and the configured audience must agree with the JWT `aud` claim. There is deliberately no fake-JWT bypass.
+Do not add `[Markdown link](...)` syntax inside environment files. The backend already has a real `JwtDecoder` checking the signature with the JWKS, `iss`, `aud`, and token timestamps. Do not bypass any validator.
 
-Spring Boot **does not automatically load arbitrary `.env` files**. `backend/src/main/resources/application.yml` now uses:
+The imported OYS realm contains:
+- Audience/resource client `oys-elibrary`.
+- Browser client `oys-elibrary-web` using **Authorization Code + PKCE S256**, exact local callback `http://localhost:3000/auth/callback` (callback is **not yet implemented**).
+- Protocol mappers supplying access token `aud` including `oys-elibrary`, top-level `roles`, and `college_id` from an admin-managed Keycloak user attribute.
+- Realm roles `OYS_STUDENT`, `OYS_SUPER_ADMIN`. No seeded student/admin accounts or auto-granted roles. Self registration disabled.
 
-```yaml
-spring:
-  config:
-    import:
-      - "optional:file:./.env[.properties]"
-      - "optional:file:./backend/.env[.properties]"
-```
+For a non-production test student, create the user in Keycloak Admin Console and explicitly assign the `OYS_STUDENT` realm role. Set a verified `college_id` user attribute pointing to your trusted college record. Do not grant users self-service editing of `college_id`. Verify subscription and college membership server-side before real release. Grant `OYS_SUPER_ADMIN` only to explicitly approved administrators.
 
-This supports running Spring Boot from `backend/` **or** the repository root. Real deployment environment variables take precedence. If values are absent, required database/JWT placeholders cause startup to fail safely. The optional import allows deployment without disk-based `.env` files, not authentication bypass.
+**Important**: This configures a real issuer and Keycloak token contract; it does **not** supply a working Next.js callback or obtain a login token. Avoid password grant/direct access grant shortcuts. Complete a frontend OIDC browser login with secure, HTTP-only session cookies and CSRF protection on cookie-authenticated mutation routes.
 
-### Eclipse / STS
+## 5. Start backend and check fail-closed security
 
-1. Import the repository root using **File → Import → Maven → Existing Maven Projects**.
-2. Use **Java 21** and select the **backend** Spring Boot module to run.
-3. In **Run Configurations → Arguments → Working directory**, choose either the repository root or `backend/`; it must be one of these two paths for relative `.env` imports to resolve.
-4. Check PostgreSQL is running and the database/user exist. The app needs real OYS JWT issuer/JWKS settings to start.
+From `backend/` run `mvn spring-boot:run`; from repo root run `mvn -pl backend spring-boot:run`. Java 21 and Maven are required. The Spring Boot backend is on `http://localhost:8080`.
 
-You may also run from the repository root:
+- `http://localhost:8080/actuator/health` should respond when DB and migrations are healthy.
+- `GET /api/v1/elibrary/sectors` **without** a Bearer token must be rejected.
+- When the real frontend OIDC login exists, pass a genuine Keycloak **access** token with correct `iss`, `aud`, `roles`, and a valid verified `college_id` for applicable student endpoints.
+- Wrong issuer, wrong audience, invalid signature, expired token or absent required role must be rejected.
 
-```cmd
-mvn -pl backend spring-boot:run
-```
+`frontend/.env` contains only `OYS_PREVIEW_MODE=true` for local fixture previews, **not a functional login**. Never expose DB credentials or bearer tokens in `NEXT_PUBLIC_` values.
 
-Or from `backend/`:
+## 6. Production requirements
 
-```cmd
-mvn spring-boot:run
-```
-
-## Frontend: `frontend/.env`
-
-```dotenv
-OYS_PREVIEW_MODE=true
-```
-
-This enables **sample-data UI previews only**, and only for `NODE_ENV=development` (set by `npm run dev`). The frontend is not yet connected to the OYS API or student login. Never add DB credentials, private keys or tokens to a frontend environment file; values prefixed `NEXT_PUBLIC_` are exposed to browsers.
-
-```cmd
-cd frontend
-npm install
-npm run dev
-```
-
-Next.js automatically reads `.env`. If you already have `frontend/.env.local`, that file takes precedence over `frontend/.env`; avoid conflicting values.
-
-## Git security
-
-The root `.gitignore` excludes `.env` and `.env.*` except `.env.example`. Before committing, run `git status --short` and ensure no secrets are staged. For production, use a secret manager/environment variables rather than local `.env` files. Do not commit database passwords, JWTs, or private signing keys.
-
-## Scope
-
-This change configures environment loading; it does **not** implement the outstanding PDF upload/reading, persistent reading progress, Premium credit transactions, or authentication integration.
+Do not run the `start-dev` Keycloak container, embedded dev storage, or the localhost HTTP issuer in production. Production requires an HTTPS domain under your control, Keycloak persistent PostgreSQL storage, TLS and reverse-proxy security, secret manager, backups, Keycloak account lifecycle and token policies, separate DB migration/runtime roles, and authorized college/subscription integration. The application README documents additional unfinished production functionality.
