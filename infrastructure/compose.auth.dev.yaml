@@ -1,0 +1,17 @@
+# Local authentication only. Do not use HTTP/start-dev/embedded storage in production.
+# docker compose --env-file infrastructure/keycloak/.env -f infrastructure/compose.auth.dev.yaml up -d
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.2
+    restart: unless-stopped
+    command: ["start-dev", "--import-realm", "--hostname=http://localhost:8180"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:?Set a local Keycloak admin username}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:?Set a unique local Keycloak admin password}
+    ports:
+      - "127.0.0.1:8180:8080"
+    volumes:
+      - oys_keycloak_dev_data:/opt/keycloak/data
+      - ./keycloak/oys-realm.json:/opt/keycloak/data/import/oys-realm.json:ro
+volumes:
+  oys_keycloak_dev_data:
